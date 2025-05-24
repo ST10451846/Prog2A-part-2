@@ -5,6 +5,7 @@ using System.Linq;
 using System.Media;
 using System.Speech.Synthesis;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace POE_Chatbot
@@ -374,7 +375,15 @@ namespace POE_Chatbot
             RespondWithSpeech($"Hmm... I’m not sure about that. Here's a tip instead: {randomTip}");
         }
 
-
+        // Method for the typing effect of the chatbot
+        static void TypingEffect(string message, int minDelay = 20, int maxDelay = 80)
+        {
+            foreach (char c in message)
+            {
+                Console.Write(c);
+                Thread.Sleep(random.Next(minDelay, maxDelay));
+            }
+        }
 
     }
 }
