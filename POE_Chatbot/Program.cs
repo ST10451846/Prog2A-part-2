@@ -54,7 +54,54 @@ namespace POE_Chatbot
             TypingEffect("Hello! Welcome to your Cybersecurity Awareness Assistant!\n");
 
             // Ask for the user's name
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.Write("What's your name? ");
+            Console.ForegroundColor = ConsoleColor.White;
+            string userName = Console.ReadLine();
+
+
+            LoadingEffect();
+            Console.ForegroundColor = ConsoleColor.Magenta;
+            RespondWithSpeech($"Hi, {userName}! I'm here to help you stay safe online.\n");
+
+            // Ask about interests
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.Write("\nIs there a specific topic you're interested in? ");
+            Console.ForegroundColor = ConsoleColor.Green;
+            string interestInput = Console.ReadLine()?.ToLower().Trim();
+
+
+
+            if (!string.IsNullOrWhiteSpace(interestInput))
+            {
+                string inputLower = interestInput.ToLower();
+                string topic = null;
+                string phrase = "interested in";
+
+                int startIndex = inputLower.IndexOf(phrase);
+                if (startIndex >= 0)
+                {
+                    // Extract after "interested in"
+                    startIndex += phrase.Length;
+                    if (startIndex < interestInput.Length)
+                    {
+                        topic = interestInput.Substring(startIndex).Trim(' ', '.', '!', '?');
+                    }
+                }
+                else
+                {
+                    // If phrase not found, assume entire input is the topic
+                    topic = interestInput.Trim(' ', '.', '!', '?');
+                }
+
+                if (!string.IsNullOrEmpty(topic))
+                {
+                    favoriteTopic = topic;
+                    currentTopic = topic.ToLower();
+
+                    RespondWithSpeech($"Great! I'll remember that you're interested in {favoriteTopic}. It's a crucial part of staying safe online.");
+                }
+            }
 
         }
     }
-}
