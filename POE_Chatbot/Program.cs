@@ -398,6 +398,14 @@ namespace POE_Chatbot
             Console.WriteLine();
         }
 
+        // method saves the chat history of conversation
+        static void SaveChatHistory()
+        {
+            string path = "chat_history.txt";
+            File.WriteAllLines(path, chatHistory);
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine($"Chat History saved to {path}");
+        }
 
 
     }
