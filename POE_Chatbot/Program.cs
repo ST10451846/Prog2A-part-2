@@ -385,5 +385,20 @@ namespace POE_Chatbot
             }
         }
 
+        //Method for the loading of the chatbot's output
+        static void LoadingEffect()
+        {
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.Write("ChatBot");
+            for (int i = 0; i < 10; i++)
+            {
+                Thread.Sleep(200);
+                Console.Write(".");
+            }
+            Console.WriteLine();
+        }
+
+
+
     }
 }
