@@ -178,6 +178,202 @@ namespace POE_Chatbot
             }
         }
 
+        static string favoriteTopic = null;
+        static string currentTopic = null; // Make sure this is declared at class level
+
+        // Method that provides an output to the user's question 
+        static void HandleUserQuery(string input, string userName)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+                return;
+
+            var sentimentResponses = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+    {
+        { "worried", "It's completely understandable to feel that way. Let me share some tips to help you stay safe." },
+        { "nervous", "No worries! Cybersecurity can seem tricky at first, but I’m here to help." },
+        { "scared", "You’re not alone. Many people feel this way. Let's look at how to protect yourself." },
+        { "curious", "Curiosity is great! Let’s dive into some interesting facts about cybersecurity." },
+        { "frustrated", "I get it. These things can be overwhelming. Let's take it step by step." }
+    };
+
+            var responses = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+    {
+        { "password", "Create strong passwords by using a mix of letters, numbers, and symbols. Avoid using personal info!" },
+        { "phishing", "Be cautious of emails that ask for personal info urgently. Always verify the sender!" },
+        { "data protection", "Protect personal data by keeping your software updated and using two-factor authentication." },
+        { "cybersecurity", "Cybersecurity refers to the practice of protecting systems, networks, and data from digital attacks." },
+        { "how are you", "I'm doing great! How can I assist you with cybersecurity today?" },
+        { "what's your purpose", "I'm here to help you learn how to stay safe online by giving cybersecurity advice." },
+        { "what is phishing", "Phishing is a type of cyber attack where attackers impersonate legitimate entities to steal sensitive information." },
+        { "what is data protection", "Data protection involves safeguarding important information from corruption, compromise, or loss." },
+        { "what is cybersecurity", "Cybersecurity refers to the practice of protecting systems, networks, and data from digital attacks." },
+        { "what can i ask you about", "You can ask me about password safety, phishing, protecting personal data, and general questions." },
+        { "help", "You can ask about passwords, phishing, data protection, or general cybersecurity guidance." }
+    };
+
+            var detailedResponses = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+    {
+        { "password", "A strong password should be at least 12 characters long and combine uppercase, lowercase, numbers, and symbols. Avoid common words or patterns." },
+        { "phishing", "Phishing attacks often use urgent or threatening language to trick you into clicking a malicious link or revealing sensitive info. Always verify sender details carefully." },
+        { "data protection", "Data protection means securing your personal info using encryption, backups, secure passwords, and limiting who can access your data." },
+        { "cybersecurity", "Cybersecurity involves multiple layers of protection across computers, networks, programs, or data to prevent unauthorized access or attacks." }
+    };
+
+            var keywordGroups = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase)
+    {
+        { "password", new List<string> { "password", "strong password", "secure password" } },
+        { "phishing", new List<string> { "phishing", "phishing emails", "fake emails", "what is phishing", "explain phishing" } },
+        { "data protection", new List<string> { "data protection", "protect personal data", "secure data", "what is data protection", "explain data protection" } },
+        { "cybersecurity", new List<string> { "cybersecurity", "what is cybersecurity", "cyber security", "explain cybersecurity" } }
+    };
+
+            var tips = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+    {
+        { "phishing tip", "Always hover over links in emails to preview the URL. Don’t click unless you’re sure it's legit!" },
+        { "password tip", "Use a passphrase instead of a password – it's longer and easier to remember, yet secure." },
+        { "data protection tip", "Regularly back up your data and avoid storing sensitive information on shared devices." }
+    };
+
+            Random random = new Random();
+
+            // Clean input (remove punctuation and make lowercase)
+            string cleanedInput = new string(input.Where(c => !char.IsPunctuation(c)).ToArray()).ToLower();
+
+            // Improved follow-up detection
+
+            // Multi-word phrases to check first
+            string[] multiWordFollowUps = new string[]
+            {
+        "tell me more about",
+        "what do you mean"
+            };
+
+            // Single word keywords to check
+            string[] singleWordFollowUps = new string[]
+            {
+        "more", "explain", "explanation", "clarify", "confused", "details"
+            };
+
+            bool isFollowUp = false;
+
+            // Check multi-word phrases first
+            foreach (var phrase in multiWordFollowUps)
+            {
+                if (cleanedInput.Contains(phrase))
+                {
+                    isFollowUp = true;
+                    break;
+                }
+            }
+
+            if (!isFollowUp)
+            {
+
+                // Split input into words, ignoring empty entries
+                string[] inputWords = input
+                    .Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+
+                foreach (var keyword in singleWordFollowUps)
+                {
+                    if (inputWords.Contains(keyword))
+                    {
+                        isFollowUp = true;
+                        break;
+                    }
+                }
+            }
+
+            // Check sentiment first
+            string matchedSentiment = sentimentResponses.Keys
+                .FirstOrDefault(sentiment => cleanedInput.Contains(sentiment.ToLower()));
+
+            if (matchedSentiment != null)
+            {
+                RespondWithSpeech(sentimentResponses[matchedSentiment]);
+                return;
+            }
+
+            //Check exact match in responses
+            string exactMatch = responses.Keys
+                .FirstOrDefault(k => k.Equals(cleanedInput, StringComparison.OrdinalIgnoreCase));
+
+            if (!string.IsNullOrEmpty(exactMatch))
+            {
+                RespondWithSpeech(responses[exactMatch]);
+                currentTopic = exactMatch.ToLower();
+                return;
+            }
+
+            // If follow-up, and currentTopic has a detailed response, return that
+            if (isFollowUp && currentTopic != null && detailedResponses.ContainsKey(currentTopic))
+            {
+                RespondWithSpeech(detailedResponses[currentTopic]);
+                return;
+            }
+
+            // Check if input contains any key exactly, respond accordingly
+            foreach (var key in responses.Keys)
+            {
+                if (cleanedInput.Contains(key.ToLower()))
+                {
+                    string baseResponse = responses[key];
+                    string personalizedResponse = (!string.IsNullOrEmpty(favoriteTopic) && favoriteTopic.ToLower() == key.ToLower())
+                        ? $"Since you're interested in {favoriteTopic}, here's a tip: {baseResponse}"
+                        : baseResponse;
+
+                    RespondWithSpeech(personalizedResponse);
+                    currentTopic = key.ToLower();
+                    return;
+                }
+            }
+
+            //  Check sentiment again 
+            foreach (var sentiment in sentimentResponses)
+            {
+                if (cleanedInput.Contains(sentiment.Key.ToLower()))
+                {
+                    RespondWithSpeech(sentiment.Value);
+                    return;
+                }
+            }
+
+            //  Check tips dictionary
+            foreach (var tip in tips)
+            {
+                if (cleanedInput.Contains(tip.Key.ToLower()))
+                {
+                    RespondWithSpeech(tip.Value);
+                    return;
+                }
+            }
+
+            // Keyword group fallback
+            foreach (var group in keywordGroups)
+            {
+                foreach (var keyword in group.Value)
+                {
+                    if (cleanedInput.Contains(keyword.ToLower()))
+                    {
+                        RespondWithSpeech(responses[group.Key]);
+                        currentTopic = group.Key;
+                        return;
+                    }
+                }
+            }
+
+            //  Fallback tips if nothing matched
+            string[] fallbackTips = new string[]
+            {
+               "Use multi-factor authentication (MFA) wherever possible to enhance security!",
+               "Always verify the sender's email address before clicking on any link!",
+               "Avoid using public Wi-Fi for accessing sensitive information like banking."
+            };
+
+            string randomTip = fallbackTips[random.Next(fallbackTips.Length)];
+            RespondWithSpeech($"Hmm... I’m not sure about that. Here's a tip instead: {randomTip}");
+        }
+
 
 
     }
