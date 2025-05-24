@@ -103,5 +103,53 @@ namespace POE_Chatbot
                 }
             }
 
+            // Display available topics the user can ask about
+            Console.WriteLine(new string('-', 50));
+            Console.WriteLine(" You can ask about:");
+            Console.WriteLine("- What is phishing?");
+            Console.WriteLine("- What is cybersecurity?");
+            Console.WriteLine("- What is data protection?");
+            Console.WriteLine(" - How to create strong passwords");
+            Console.WriteLine(" - How to recognize phishing emails");
+            Console.WriteLine(" - How to protect personal data");
+            Console.WriteLine(" - General questions like \"How are you?\", \"What's your purpose?\", " +
+            "and \"What can I ask you about?\"");
+            Console.WriteLine(" - Or type 'exit' to quit.");
+            Console.WriteLine(new string('-', 50));
+
+            // Start the chat loop
+            while (true)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.Write($"\n{userName}: ");
+                string userInput = Console.ReadLine()?.ToLower().Trim();
+
+                // checks for an empty input
+                if (string.IsNullOrEmpty(userInput))
+                {
+                    LoadingEffect();
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    RespondWithSpeech("Please enter a valid question.");
+                    continue;
+                }
+
+                //Check to see if the user enters 'exit' command
+                if (userInput == "exit")
+                {
+                    LoadingEffect();
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    RespondWithSpeech($"Goodbye, {userName}! Stay sharp and secure out there.");
+                    break;
+                }
+
+                HandleUserQuery(userInput, userName);
+
+            }
+
+            // Save chat history when exiting
+            SaveChatHistory();
         }
+
+
     }
+}
