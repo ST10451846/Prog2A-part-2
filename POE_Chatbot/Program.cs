@@ -407,6 +407,26 @@ namespace POE_Chatbot
             Console.WriteLine($"Chat History saved to {path}");
         }
 
+        //Chatbot is able to read out the output it provides
+        static void RespondWithSpeech(string response)
+        {
+            LoadingEffect();
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            TypingEffect($"ChatBot: {response}\n");
+
+            try
+            {
+                synth.Speak(response); //Reliable speech output 
+            }
+            catch (Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"TTS Error: {ex.Message} ");
+            }
+
+            chatHistory.Add($"ChatBot: {response}");
+        }
+
 
     }
 }
