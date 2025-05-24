@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Media;
 using System.Speech.Synthesis;
 using System.Text;
 using System.Threading.Tasks;
@@ -149,6 +151,33 @@ namespace POE_Chatbot
             // Save chat history when exiting
             SaveChatHistory();
         }
+
+        // Method to play the welcome audio 
+        static void PlayWelcomeAudio(string filePath)
+        {
+            try
+            {
+                string fullPath = Path.Combine(Directory.GetCurrentDirectory(), filePath);
+
+                if (File.Exists(fullPath))
+                {
+                    SoundPlayer player = new SoundPlayer(fullPath);
+                    player.PlaySync();
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine($"Error: The file '{filePath}' was not found.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($" Error playing audio: {ex.Message}");
+
+            }
+        }
+
 
 
     }
