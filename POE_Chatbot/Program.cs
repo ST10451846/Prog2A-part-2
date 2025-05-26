@@ -402,10 +402,19 @@ namespace POE_Chatbot
         static void SaveChatHistory()
         {
             string path = "chat_history.txt";
+
+            if (chatHistory.Count == 0)
+            {
+                Console.ForegroundColor = ConsoleColor.DarkYellow;
+                Console.WriteLine("No chat history to save.");
+                return;
+            }
+
             File.WriteAllLines(path, chatHistory);
             Console.ForegroundColor = ConsoleColor.Gray;
-            Console.WriteLine($"Chat History saved to {path}");
+            Console.WriteLine($"Chat History saved to {Path.GetFullPath(path)}");
         }
+
 
         //Chatbot is able to read out the output it provides
         static void RespondWithSpeech(string response)
